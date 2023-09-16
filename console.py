@@ -126,7 +126,10 @@ class HBNBCommand(cmd.Cmd):
             print("** class doesn't exist **")
             return
         
-        kwargs = {}
+        kwargs = {
+            'updated_at': datetime.utcnow(),
+            'created_at': datetime.utcnow()
+        }
         for param in args_list[1:]:
             parts = param.split('=')
             if len(parts) !=2:
