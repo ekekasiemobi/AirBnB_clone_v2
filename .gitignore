@@ -1,4 +1,5 @@
 .venv
 .console.py.swp
 models/engine/.file_storage.py.swp
-models/engine/__pycache__/
+models/engine/__pycache__
+models/__pycache__
