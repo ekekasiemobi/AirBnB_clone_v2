@@ -113,46 +113,50 @@ class HBNBCommand(cmd.Cmd):
         """ Overrides the emptyline method of CMD """
         pass
 
-    def do_create(self, args):
+    def do_create(self, arg):
         """ Create an object of any class with given parameters """
-        if not args:
-            print("** class name missing **")
-            return
+    try:
+        if not arg:
+            raise SyntaxError("Missing arguments")
         
-        args_list = args.split()
+        args_list = arg.split()
         class_name = args_list[0]
-
         if class_name not in HBNBCommand.classes:
             print("** class doesn't exist **")
             return
         
-        kwargs = {
-            'updated_at': datetime.utcnow(),
-            'created_at': datetime.utcnow()
-        }
+        params = {}
         for param in args_list[1:]:
-            parts = param.split('=')
-            if len(parts) !=2:
-                continue
-        
-            key, value = parts
-            # Checks if the value is enclosed in double quotes and unescape it
+            key, value = param.split('=')
             if value.startswith('"') and value.endswith('"'):
-                value = value[1:-1].replace('\\"', '"').replace('_', ' ')
+                # Handle string parameter
+                value = value.strip('"').replace('\\"', '"').replace('_', ' ')
+            elif '.' in value:
+                try:
+                    # Handle float parameter
+                    value = float(value)
+                except ValueError:
+                    print('Invalid float value: {}'.format(value))
+                    continue
             else:
                 try:
-                    if '.' in value:
-                        value = float(value)
-                    else:
-                        value = int(value)
+                    # Handle integer parameter
+                    value = int(value)
                 except ValueError:
+                    print('Invalid integer value: {}'.format(value))
                     continue
-
-            kwargs[key] = value
-        new_instance = HBNBCommand.classes[class_name](**kwargs)
+            params[key] = value
+        
+        new_instance = HBNBCommand.classes[class_name](**params)
+        storage.new(new_instance)
         storage.save()
         print(new_instance.id)
-        storage.save()
+        
+    except SyntaxError as e:
+        print(str(e))
+    except NameError:
+        print("** class doesn't exist **")
+
 
     def help_create(self):
         """ Help information for the create method """
