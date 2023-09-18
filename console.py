@@ -146,6 +146,12 @@ class HBNBCommand(cmd.Cmd):
                         print('Invalid integer value: {}'.format(value))
                         continue
                 params[key] = value
+ 
+            # Ensure that 'created_at' and 'updated_at' attributes are provided
+            if 'created_at' not in params:
+                params['created_at'] = datetime.now()
+            if 'updated_at' not in params:
+                params['updated_at'] = datetime.now()
         
             new_instance = HBNBCommand.classes[class_name](**params)
             storage.new(new_instance)
