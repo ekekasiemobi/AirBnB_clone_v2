@@ -16,3 +16,16 @@ class Place(BaseModel):
     latitude = 0.0
     longitude = 0.0
     amenity_ids = []
+
+    if HBNB_TYPE_STORAGE == 'db':
+        pass
+    else:
+        @property
+        def reviews(self):
+            """Getter attribute for reviews related to the current Place"""
+            from models import storage
+            reviews = []
+            for review in storage.all(Review).values():
+                if review.place_id == self.id:
+                    reviews.append(review)
+            return reviews
