@@ -152,8 +152,13 @@ class HBNBCommand(cmd.Cmd):
                 params['created_at'] = datetime.now()
             if 'updated_at' not in params:
                 params['updated_at'] = datetime.now()
-        
-            new_instance = HBNBCommand.classes[class_name](**params)
+
+            # Check if the class_name is BaseModel or its subclasses
+            if class_name not in HBNBCommand.classes:
+                print("** class doesn't exist **")
+                return
+            new_instance = HBNBCommand.classes[class_name](attributes)
+
             storage.new(new_instance)
             storage.save()
             print(new_instance.id)
