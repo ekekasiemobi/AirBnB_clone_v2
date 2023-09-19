@@ -122,16 +122,20 @@ class HBNBCommand(cmd.Cmd):
             args_list = arg.split()
             class_name = args_list[0]
             print(class_name)
-            if class_name not in HBNBCommand.classes.keys():
+            if class_name not in HBNBCommand.classes:
                 print("** class doesn't exist **")
                 return
         
             params = {}
             for param in args_list[1:]:
-                key, value = param.split('=')
+                tokens = param.split('=')
+                if len(tokens) != 2:
+                    print("invalid parameter")
+                    continue
+                key, value = tokens[0], token[1]
                 if value.startswith('"') and value.endswith('"'):
                     # Handle string parameter
-                    value = value.strip('"').replace('\\"', '"').replace('_', ' ')
+                    value = value.replace('_', ' ')
                 elif '.' in value:
                     try:
                         # Handle float parameter
@@ -149,18 +153,15 @@ class HBNBCommand(cmd.Cmd):
                 params[key] = value
  
             # Ensure that 'created_at' and 'updated_at' attributes are provided
-            if 'created_at' not in params:
+            if 'created_at' not in params.items():
+                base = Basemodel()
+                params['id'] = base.id
                 params['created_at'] = datetime.now()
-            if 'updated_at' not in params:
                 params['updated_at'] = datetime.now()
 
-            # Check if the class_name is BaseModel or its subclasses
-            if class_name not in HBNBCommand.classes:
-                print("** class doesn't exist **")
-                return
-            new_instance = HBNBCommand.classes[class_name](attributes)
+            new_instance = HBNBCommand.classes[class_name](**params)
 
-            storage.new(new_instance)
+            new_instance.save()
             storage.save()
             print(new_instance.id)
         
