@@ -10,6 +10,7 @@ from models.city import City
 from models.amenity import Amenity
 from models.review import Review
 from models.__init__ import storage
+from datetime import datetime
 
 
 class HBNBCommand(cmd.Cmd):
@@ -120,12 +121,12 @@ class HBNBCommand(cmd.Cmd):
                 raise SyntaxError("Missing arguments")
         
             args_list = arg.split()
-            class_name = args_list[0]
-            print(class_name)
-            if class_name not in HBNBCommand.classes.keys():
+            class_name = args_list[0].strip()
+            """
+            if class_name not in HBNBCommand.classes:
                 print("** class doesn't exist **")
                 return
-        
+            """ 
             params = {}
             for param in args_list[1:]:
                 key, value = param.split('=')
@@ -158,7 +159,7 @@ class HBNBCommand(cmd.Cmd):
             if class_name not in HBNBCommand.classes:
                 print("** class doesn't exist **")
                 return
-            new_instance = HBNBCommand.classes[class_name](attributes)
+            new_instance = HBNBCommand.classes[class_name](params)
 
             storage.new(new_instance)
             storage.save()
@@ -166,8 +167,8 @@ class HBNBCommand(cmd.Cmd):
         
         except SyntaxError as e:
             print(str(e))
-        except NameError:
-            print("** class doesn't exist **")
+         # except NameError:
+           # print("** class doesn't exist **")
 
 
     def help_create(self):
