@@ -3,13 +3,13 @@
 import cmd
 import sys
 from models.base_model import BaseModel
-from models.__init__ import storage
 from models.user import User
 from models.place import Place
 from models.state import State
 from models.city import City
 from models.amenity import Amenity
 from models.review import Review
+from models.__init__ import storage
 
 
 class HBNBCommand(cmd.Cmd):
@@ -113,46 +113,62 @@ class HBNBCommand(cmd.Cmd):
         """ Overrides the emptyline method of CMD """
         pass
 
-    def do_create(self, args):
+    def do_create(self, arg):
         """ Create an object of any class with given parameters """
-        if not args:
-            print("** class name missing **")
-            return
+        try:
+            if not arg:
+                raise SyntaxError("Missing arguments")
         
-        args_list = args.split()
-        class_name = args_list[0]
-
-        if class_name not in HBNBCommand.classes:
-            print("** class doesn't exist **")
-            return
+            args_list = arg.split()
+            class_name = args_list[0]
+            print(class_name)
+            if class_name not in HBNBCommand.classes.keys():
+                print("** class doesn't exist **")
+                return
         
-        kwargs = {
-            'updated_at': datetime.utcnow(),
-            'created_at': datetime.utcnow()
-        }
-        for param in args_list[1:]:
-            parts = param.split('=')
-            if len(parts) !=2:
-                continue
-        
-            key, value = parts
-            # Checks if the value is enclosed in double quotes and unescape it
-            if value.startswith('"') and value.endswith('"'):
-                value = value[1:-1].replace('\\"', '"').replace('_', ' ')
-            else:
-                try:
-                    if '.' in value:
+            params = {}
+            for param in args_list[1:]:
+                key, value = param.split('=')
+                if value.startswith('"') and value.endswith('"'):
+                    # Handle string parameter
+                    value = value.strip('"').replace('\\"', '"').replace('_', ' ')
+                elif '.' in value:
+                    try:
+                        # Handle float parameter
                         value = float(value)
-                    else:
+                    except ValueError:
+                        print('Invalid float value: {}'.format(value))
+                        continue
+                else:
+                    try:
+                        # Handle integer parameter
                         value = int(value)
-                except ValueError:
-                    continue
+                    except ValueError:
+                        print('Invalid integer value: {}'.format(value))
+                        continue
+                params[key] = value
+ 
+            # Ensure that 'created_at' and 'updated_at' attributes are provided
+            if 'created_at' not in params:
+                params['created_at'] = datetime.now()
+            if 'updated_at' not in params:
+                params['updated_at'] = datetime.now()
 
-            kwargs[key] = value
-        new_instance = HBNBCommand.classes[class_name](**kwargs)
-        storage.save()
-        print(new_instance.id)
-        storage.save()
+            # Check if the class_name is BaseModel or its subclasses
+            if class_name not in HBNBCommand.classes:
+                print("** class doesn't exist **")
+                return
+            new_instance = HBNBCommand.classes[class_name](attributes)
+
+            storage.new(new_instance)
+            storage.save()
+            print(new_instance.id)
+        
+        except SyntaxError as e:
+            print(str(e))
+        except NameError:
+            print("** class doesn't exist **")
+
 
     def help_create(self):
         """ Help information for the create method """
