@@ -5,7 +5,6 @@ from datetime import datetime
 from sqlalchemy import Column, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
-import models
 
 Base = declarative_base()
 
@@ -50,9 +49,10 @@ class BaseModel:
     def save(self):
         """updates the public instance attribute updated_at to current
         """
+        from models import storage
         self.updated_at = datetime.utcnow()
-        models.storage.new(self)
-        models.storage.save()
+        storage.new(self)
+        storage.save()
 
     def to_dict(self):
         """Create dictionary of class"""
@@ -67,4 +67,5 @@ class BaseModel:
     def delete(self):
         """ delete object
         """
+        from models import storage
         models.storage.delete(self)
