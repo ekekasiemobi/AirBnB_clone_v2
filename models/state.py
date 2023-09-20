@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """ State Module for HBNB project """
 from os import environ
-from sqlalchemy import Column, String, ForeignKey
+from sqlalchemy import Column, String, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from models.base_model import BaseModel, Base
 
@@ -9,12 +9,12 @@ class State(BaseModel, Base):
     """ State class """
     storage_type = environ.get('HBNB_TYPE_STORAGE', 'file')
 
-    __tablename__ = 'states'
+    __tablename__ = "states"
     name = Column(String(128), nullable=False)
 
+    cities = relationship('City', backref='state', cascade='all, delete')
     if storage_type == 'db':
-        from models.city import City  # Import placed here
-        cities = relationship('City', backref='state', cascade='all, delete')
+        from models.city import City
     else:
         name = ""
 

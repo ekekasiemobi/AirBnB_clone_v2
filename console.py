@@ -150,18 +150,17 @@ class HBNBCommand(cmd.Cmd):
                 params[key] = value
  
             # Ensure that 'created_at' and 'updated_at' attributes are provided
-            if 'created_at' not in params:
+            """if 'created_at' not in params:
                 params['created_at'] = datetime.now()
             if 'updated_at' not in params:
                 params['updated_at'] = datetime.now()
-
+            """
             # Check if the class_name is BaseModel or its subclasses
             if class_name not in HBNBCommand.classes:
                 print("** class doesn't exist **")
                 return
-            new_instance = HBNBCommand.classes[class_name](params)
-
-            storage.new(new_instance)
+            new_instance = HBNBCommand.classes[class_name](**params)
+            new_instance.save()
             storage.save()
             print(new_instance.id)
         
@@ -251,11 +250,11 @@ class HBNBCommand(cmd.Cmd):
             if args not in HBNBCommand.classes:
                 print("** class doesn't exist **")
                 return
-            for k, v in storage._FileStorage__objects.items():
+            for k, v in storage.all().items():
                 if k.split('.')[0] == args:
                     print_list.append(str(v))
         else:
-            for k, v in storage._FileStorage__objects.items():
+            for k, v in storage.all().items():
                 print_list.append(str(v))
 
         print(print_list)
