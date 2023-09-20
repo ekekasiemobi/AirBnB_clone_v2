@@ -135,17 +135,13 @@ class HBNBCommand(cmd.Cmd):
                     value = value.strip('"').replace('\\"', '"').replace('_', ' ')
                 elif '.' in value:
                     try:
-                        # Handle float parameter
                         value = float(value)
                     except ValueError:
-                        print('Invalid float value: {}'.format(value))
                         continue
                 else:
                     try:
-                        # Handle integer parameter
                         value = int(value)
                     except ValueError:
-                        print('Invalid integer value: {}'.format(value))
                         continue
                 params[key] = value
  
@@ -160,15 +156,10 @@ class HBNBCommand(cmd.Cmd):
                 print("** class doesn't exist **")
                 return
             new_instance = HBNBCommand.classes[class_name](**params)
-            new_instance.save()
-            storage.save()
-            print(new_instance.id)
-        
-        except SyntaxError as e:
-            print(str(e))
-         # except NameError:
-           # print("** class doesn't exist **")
 
+            new_instance.save()
+            print(new_instance.id)
+            storage.save()
 
     def help_create(self):
         """ Help information for the create method """
