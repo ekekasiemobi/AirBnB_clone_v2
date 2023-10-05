@@ -22,31 +22,18 @@ chown -R ubuntu:ubuntu /data/
 config_content="
 server{
     listen 80 default_server;
-	listen [::]:80 default_server;
+    listen [::]:80 default_server;
 
-	server_name _;
-	index index.html index.htm;
-	error_page 404 /404.html;
-	add_header X-Served-By \$hostname;
+    server_name _;
 
-	location / {
-		root /var/www/html/;
-		try_files \$uri \$uri/ =404;
-	}
+    location /hbnb_static {
+        alias /data/web_static/current;
+    }
 
-	location /hbnb_static/ {
-		alias /data/web_static/current/;
-		try_files \$uri \$uri/ =404;
-	}
+    location / {
+        return 404;
+    }
 
-	if (\$request_filename ~ redirect_me) {
-		rewrite ^ https://sketchfab.com/bluepeno/models permanent;
-	}
-
-	location = /404.html {
-		root /var/www/error/;
-		internal;
-	}
 }"
 
 sudo service nginx start
