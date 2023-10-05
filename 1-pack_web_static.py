@@ -4,8 +4,11 @@ from fabric.api import local
 import os
 from datetime import datetime
 
+"""generates a .tgx file"""
+
 
 def do_pack():
+    """generates a .tgx file"""
     try:
         now = datetime.now()
         path = "web_static_{}.tgz".format(
