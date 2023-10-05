@@ -3,14 +3,15 @@
 import cmd
 import sys
 from models.base_model import BaseModel
-from models.__init__ import storage
 from models.user import User
 from models.place import Place
 from models.state import State
 from models.city import City
 from models.amenity import Amenity
 from models.review import Review
+from models import storage
 
+from datetime import datetime
 
 class HBNBCommand(cmd.Cmd):
     """ Contains the functionality for the HBNB console"""
@@ -66,10 +67,7 @@ class HBNBCommand(cmd.Cmd):
 
                 # isolate _id, stripping quotes
                 _id = pline[0].replace('\"', '')
-                # possible bug here:
-                # empty quotes register as empty _id when replaced
 
-                # if arguments exist beyond _id
                 pline = pline[2].strip()  # pline is now str
                 if pline:
                     # check for *args or **kwargs
@@ -78,7 +76,7 @@ class HBNBCommand(cmd.Cmd):
                         _args = pline
                     else:
                         _args = pline.replace(',', '')
-                        # _args = _args.replace('\"', '')
+                        _args = _args.replace('\"', '')
             line = ' '.join([_cmd, _cls, _id, _args])
 
         except Exception as mess:
@@ -115,65 +113,45 @@ class HBNBCommand(cmd.Cmd):
 
     def do_create(self, arg):
         """ Create an object of any class with given parameters """
-        try:
-            if not arg:
-                raise SyntaxError("Missing arguments")
-        
-            args_list = arg.split()
-            class_name = args_list[0]
-            print(class_name)
-            if class_name not in HBNBCommand.classes.keys():
-                print("** class doesn't exist **")
-                return
-        
-            params = {}
-            for param in args_list[1:]:
-                key, value = param.split('=')
-                if value.startswith('"') and value.endswith('"'):
-                    # Handle string parameter
-                    value = value.strip('"').replace('\\"', '"').replace('_', ' ')
-                elif '.' in value:
-                    try:
-                        # Handle float parameter
-                        value = float(value)
-                    except ValueError:
-                        print('Invalid float value: {}'.format(value))
-                        continue
-                else:
-                    try:
-                        # Handle integer parameter
-                        value = int(value)
-                    except ValueError:
-                        print('Invalid integer value: {}'.format(value))
-                        continue
-                params[key] = value
+        if not arg:
+            print("** class name missing **")
+            return
+        params = {}
+        arg = arg.split()
+        class_name = arg[0]
+        for param in arg[1:]:
+            attrib = param.split('=')
+            if len(attrib) != 2:
+                continue
+            key, value = attrib[0], attrib[1]
+            if value.startswith('"') and value.endswith('"'):
+                # Handle string parameter
+                value = value.strip('"').replace('\\"', '"').replace('_', ' ')
+            elif '.' in value:
+                try:
+                    value = float(value)
+                except ValueError:
+                    continue
+            else:
+                try:
+                    value = int(value)
+                except ValueError:
+                    continue
+            params[key] = value
  
-            # Ensure that 'created_at' and 'updated_at' attributes are provided
-            if 'created_at' not in params:
-                params['created_at'] = datetime.now()
-            if 'updated_at' not in params:
-                params['updated_at'] = datetime.now()
-
-            # Check if the class_name is BaseModel or its subclasses
-            if class_name not in HBNBCommand.classes:
-                print("** class doesn't exist **")
-                return
-            new_instance = HBNBCommand.classes[class_name](attributes)
-
-            storage.new(new_instance)
-            storage.save()
-            print(new_instance.id)
-        
-        except SyntaxError as e:
-            print(str(e))
-        except NameError:
+        if class_name not in HBNBCommand.classes:
             print("** class doesn't exist **")
+            return
+        new_instance = HBNBCommand.classes[class_name](**params)
 
+        new_instance.save()
+        print(new_instance.id)
+        storage.save()
 
     def help_create(self):
         """ Help information for the create method """
         print("Creates a class of any type")
-        print("[Usage]: create <className>\n")
+        print("[Usage]: create <className> <param 1> <param 2>\n")
 
     def do_show(self, args):
         """ Method to show an individual object """
@@ -250,11 +228,11 @@ class HBNBCommand(cmd.Cmd):
             if args not in HBNBCommand.classes:
                 print("** class doesn't exist **")
                 return
-            for k, v in storage._FileStorage__objects.items():
+            for k, v in storage.all().items():
                 if k.split('.')[0] == args:
                     print_list.append(str(v))
         else:
-            for k, v in storage._FileStorage__objects.items():
+            for k, v in storage.all().items():
                 print_list.append(str(v))
 
         print(print_list)
