@@ -6,6 +6,7 @@ from datetime import datetime
 
 def do_pack():
 
+
     try:
         now = datetime.now()
         path = "web_static_{}.tgz".format(
