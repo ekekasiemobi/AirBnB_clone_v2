@@ -9,13 +9,7 @@ mkdir -p /data/web_static/shared
 
 sudo echo "Welcome to my World!" | sudo tee /data/web_static/releases/test/index.html
 
-if [ -L /data/web_static/current ]; then
-    rm /data/web_static/current
-fi
-
-echo "$config_content" > /etc/nginx/sites-available/my_config
-
-ln -s /data/web_static/releases/test /data/web_static/current
+ln -sf /data/web_static/releases/test /data/web_static/current
 
 chown -R ubuntu:ubuntu /data/
 
@@ -28,12 +22,17 @@ server{
 
     location /hbnb_static {
         alias /data/web_static/current;
+        index index.html index.htm;
     }
 
-    location / {
-        return 404;
+    error_page 404 /404.html;
+        location /404 {
+                root /var/www/html;
+                internal;
     }
 
 }"
+echo "$config_content" > /etc/nginx/sites-available/default
 
-sudo service nginx start
+sudo service nginx restart
+
