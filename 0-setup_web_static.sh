@@ -9,12 +9,16 @@ mkdir -p /data/web_static/shared
 
 sudo echo "Welcome to my World!" | sudo tee /data/web_static/releases/test/index.html
 
+# Create or recreate the symbolic link
+if [ -L /data/web_static/current ]; then
+    rm /data/web_static/current
+fi
+
 ln -s /data/web_static/releases/test /data/web_static/current
 
 chown -R ubuntu:ubuntu /data/
 
-config_content="
-server {
+printf %s "server {
     listen 80 default_server;
     listen [::]:80 default_server;
 
